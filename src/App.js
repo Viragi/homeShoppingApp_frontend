@@ -1,28 +1,78 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { NavLink, withRouter } from 'react-router-dom';
+import Router from './Router';
+import axios from 'axios';
+import { connect } from 'react-redux';
+
+const Navigation = ({ cart }) => (
+  <nav className="menu">
+    <ul>
+      <li>
+        <NavLink to="/">Home </NavLink>
+      </li>
+      <li>
+        <NavLink to="/cart">
+          Cart{' '}
+          {cart.reduce((sum, item) => {
+            return sum + item.quantity;
+          }, 0)}
+        </NavLink>
+      </li>
+      <li>
+        <NavLink to="/checkout"> Checkout</NavLink>
+      </li>
+      {window.localStorage.jwtToken ? (
+        <li>
+          <NavLink
+            to="/logout"
+            onClick={() => {
+              localStorage.removeItem('jwtToken');
+            }}
+          >
+            {' '}
+            Logout
+          </NavLink>
+        </li>
+      ) : (
+        <span>
+          <li>
+            <NavLink to="/login"> Login</NavLink>
+          </li>
+          <li>
+            <NavLink to="/SignUp"> SignUp</NavLink>
+          </li>
+        </span>
+      )}
+    </ul>
+  </nav>
+);
 
 class App extends Component {
+  componentDidMount() {
+    if (window.localStorage.jwtToken) {
+      console.log('JWTTOKEN', window.localStorage.jwtToken);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${
+        window.localStorage.jwtToken
+      }`;
+    } else {
+      delete axios.defaults.headers.common['Authorization'];
+    }
+  }
+
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div className="pagecontainer">
+        <Navigation {...this.props} />
+        <Router />
       </div>
     );
   }
 }
 
-export default App;
+function mapStateToProps(state) {
+  return {
+    cart: state.cart
+  };
+}
+
+export default withRouter(connect(mapStateToProps)(App));
