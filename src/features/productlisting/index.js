@@ -7,11 +7,13 @@ import SortBy from './SortBy';
 
 class ProductListing extends React.Component {
   componentDidMount() {
+    console.log('HANDLE APLI CALL');
     this.handleAPIcall();
   }
 
   handleAPIcall = value => {
     const { loadProducts } = this.props;
+    //check in store if available for sortBy
     axios.get(`http://localhost:3000/products?sortby=${value}`).then(res => {
       console.log('JJJSSSONN', res);
       loadProducts(res.data);
@@ -25,9 +27,10 @@ class ProductListing extends React.Component {
           <SortBy handleAPIcall={this.handleAPIcall} />
         </div>
         <div className="productlisting">
-          {this.props.products.map(product => {
+          {this.props.products.map((product, key) => {
             return (
               <ProductListItem
+                key={product.id}
                 product={product}
                 addToCart={this.props.addToCart}
                 removeFromCart={this.props.removeFromCart}
